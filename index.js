@@ -1,10 +1,11 @@
-import express, { json } from "express";
+import express, { json, response } from "express";
 import mysql from "mysql2/promise";
 import { myConfig } from "./configDataBase.js";
+import cors from "cors";
 
 const app = express();
-
 app.use(express.json());
+app.use(cors())
 
 let connection;
 
@@ -14,6 +15,7 @@ try {
   connection = mysql.createPool(myConfig);
   await connection.execute("select 1");
   console.log("sikeres kapcsolódás az adatbázishoz");
+
 } catch (error) {
   console.log("ahhhhhh", error);
   process.exit(1); //leállítja a programot mert az alkalmalzás nem tudja megnyitni az adatbázist!!
@@ -67,6 +69,18 @@ app.delete('/todos/:id', async (rq,rs) =>{
         console.log(error);
         
     }
+})
+
+//bejelentkezes
+app.post('/todos/login',(rq,rs) =>{
+   const {username,password} = rq.body
+   if(username == process.env.LOGIN_USER && password == process.env.LOGIN_PW){
+     rs.json({success : true , msg : 'Sikeres bejelentkezés'})
+   }
+   else{
+      rs.status(400).json({success : false , msg : 'Sikertelen bejelentkezés'})
+   }
+
 })
 
 
